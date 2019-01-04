@@ -1,0 +1,94 @@
+{extend name="layout/matrix" /}
+
+{block name="css"}
+    <!--下拉框css-->
+    {include file="slot/Select/css"/}
+
+    <!--单选框css-->
+    {include file="slot/Radio/css"/}
+{/block}
+
+{block name="main-header"}
+<section class="content-header">
+    <h1>
+        添加设备
+        <small></small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="{:url('/')}"><i class="fa fa-home"></i> 首页</a></li>
+        <li class="active">添加设备</li>
+    </ol>
+</section>
+{/block}
+
+{block name="main"}
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-info">
+                <!--<div class="box-header with-border">-->
+                <!--<h3 class="box-title">标题</h3>-->
+                <!--</div>-->
+                <!-- /.box-header -->
+                <!-- form start -->
+                <form role="form">
+                    <div class="box-body">
+
+                        <!--普通下拉框-->
+                        {include
+                        file="slot/Select/select"
+                        title='所属代理'
+                        name='select'
+                        options="[['name'=>'河北总代理','value'=>1],['name'=>'北京总代理','value'=>2],['name'=>'泰国总代理','value'=>3]]" /}
+
+                        <!--普通下拉框-->
+                        {include
+                        file="slot/Select/select"
+                        title='所属商户'
+                        name='select'
+                        options="[['name'=>'石家庄蓝尔','value'=>1],['name'=>'南三条集团','value'=>2],['name'=>'兰州拉面','value'=>3],['name'=>'小红便利店','value'=>4]]" /}
+
+                        <!--普通下拉框-->
+                        {include
+                        file="slot/Select/select"
+                        title='所属门店'
+                        name='select'
+                        options="[['name'=>'旗舰店','value'=>1],['name'=>'南4排2号','value'=>2],['name'=>'兰州拉面','value'=>3],['name'=>'小红便利店','value'=>4]]" /}
+
+                        <!--单选框-->
+                        {include
+                        file="slot/Radio/radio"
+                        type='level'
+                        name="radio_name"
+                        options="[['name'=>'是','value'=>1], [ 'name'=>'否','value'=>0,'checked' => 1]]"
+                        title='是否可退款' /}
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">备注</label>
+                            <input type="email" class="form-control" id="exampleInputEmail1" placeholder="备注">
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+
+                    <div class="box-footer">
+                        <a class="btn btn-default" href="javaScript:history.back(-1)">取消</a>
+                        <button type="submit" class="btn btn-info pull-right">提交</button>
+                    </div>
+                </form>
+            </div>
+            <!-- /.box -->
+        </div>
+    </div>
+</section>
+{/block}
+
+{block name="script"}
+
+<!--下拉框js-->
+{include file="slot/Select/script"/}
+
+<!--单选框js-->
+{include file="slot/Radio/script"/}
+
+{/block}

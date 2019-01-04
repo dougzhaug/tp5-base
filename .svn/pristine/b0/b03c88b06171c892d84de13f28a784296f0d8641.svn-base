@@ -1,0 +1,62 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2018/12/20
+ * Time: 18:21
+ */
+
+namespace app\admin\model;
+
+
+use think\Db;
+use think\Model;
+
+class AdminModel extends Model
+{
+    // 设置当前模型对应的完整数据表名称
+    protected $table = 'T_SysUser';
+
+    protected $pk = 'Uid';
+
+    protected $insert = ['Utype' => 1];
+
+    public function setRoleAttr($value){
+        return ','.$value.',';
+    }
+
+    public function getAdminlist($params){
+
+        $fields = join(',',$params['fields']);
+        $where  = array_merge([['Utype','=',1]],$params['where']);
+        $order  = empty($params['order']) ? $this->pk  : $params['order'];
+        $limit_start  = $params['limit_s'];
+        $limit_length = $params['limit_l'] >50 ? 50 : $params['limit_l'];
+
+        //返回符合条件的总数
+        $counts = $this->where($where)->count();
+        //返回本页数据
+        $lists = $this->field($fields)->where($where)->order($order)->limit($limit_start,$limit_length)->select();
+       // return $this->getLastSql();
+        //处理角色数字转文字dd
+        $roles = Db::table('T_Role')->field('Rid,Rname')->select();
+        $rolesFlip = array_column($roles,'Rname','Rid');
+        foreach ($lists as $k => $val){
+            if(!empty($val['Role'])){
+                $tmparr =  explode(',',$val['Role']);
+                $tmpstr = [];
+                foreach ($tmparr as $item) {
+                    if ( !empty($item)) $tmpstr[] = $rolesFlip[intval($item)];
+                }
+                $lists[$k]['Role'] = join(',',$tmpstr);
+            }
+        }
+        return ['total'=>$counts , 'list'=>$lists];
+    }
+    public function getAdminInfoByUid($Uid){
+        $infos = $this->field('Uid,Uname,Uemail,IsState,Role,IsDel')
+            ->where('Uid',$Uid)
+            ->find();
+        return $infos;
+    }
+}

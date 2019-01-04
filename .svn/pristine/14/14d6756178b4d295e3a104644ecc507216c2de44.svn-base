@@ -1,0 +1,88 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2018/12/20
+ * Time: 18:21
+ */
+
+namespace app\admin\model;
+
+
+use think\Model;
+
+class AdminModel extends Model
+{
+    // 设置当前模型对应的完整数据表名称
+    protected $table = 'T_SysUser';
+
+    protected $pk = 'Uid';
+
+    public $alias = 'a';
+
+    protected $insert = ['Utype' => 1];
+
+    public function getIsStateAttr($value)
+    {
+        $status = [0=>'正常',1=>'禁用'];
+        return $status[$value];
+    }
+
+    public function setUpasswordAttr($value)
+    {
+        if (empty($value)){
+            return mk_pwd('a123456');
+        }else{
+            return mk_pwd($value);
+        }
+
+    }
+
+
+    public function getAdminlist($params){
+
+        $fields = join(',',$this->aliasFields($params['fields']));
+        $where  = array_merge([['Utype','=',1]],$params['where']);
+        $order  = empty($params['order']) ? $this->pk  : $params['order'];
+        $limit_start  = $params['limit_s'];
+        $limit_length = $params['limit_l'] >50 ? 50 : $params['limit_l'];
+
+        //返回符合条件的总数
+        $counts = $this->alias($this->alias)
+            ->join('T_Role r',$this->alias .'.Role = r.Rid','LEFT')
+            ->field($fields)
+            ->where($where)
+            ->count();
+        //返回本页数据
+        $lists = $this->alias($this->alias)
+                    ->join('T_Role r',$this->alias .'.Role = r.Rid','LEFT')
+                    ->field($fields)
+                    ->where($where)
+                    ->order($order)
+                    ->limit($limit_start,$limit_length)
+                    ->select();
+       return ['total'=>$counts , 'list'=>$lists];
+       // return $this->getLastSql();
+    }
+    public function getAdminInfoByUid($Uid){
+        $infos = $this->field('Uid,Uname,Uemail,IsState,Role,IsDel')
+            ->where('Uid',$Uid)
+            ->find();
+        return $infos;
+    }
+
+    protected function aliasFields($fields){
+        $tableFields = $this->getTableFields();
+        if (is_array($fields)){
+            foreach ($fields as $key => &$value){
+                if (in_array($value,$tableFields)){
+                    $value = $this->alias .'.'.$value;
+                }
+            }
+            return $fields;
+        }else{
+            return $this->alias .$fields;
+        }
+    }
+
+}

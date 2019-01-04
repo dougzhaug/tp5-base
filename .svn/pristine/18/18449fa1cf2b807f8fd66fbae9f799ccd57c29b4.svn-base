@@ -1,0 +1,73 @@
+{extend name="layout/matrix" /}
+
+{block name="css"}
+<!--JsTree css-->
+{include file="slot/JsTree/css"/}
+{/block}
+
+{block name="main-header"}
+<section class="content-header">
+    <h1>
+        添加角色
+        <small></small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="{:url('/')}"><i class="fa fa-home"></i> 首页</a></li>
+        <li class="active">添加角色</li>
+    </ol>
+</section>
+{/block}
+
+{block name="main"}
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-info">
+                <!--<div class="box-header with-border">-->
+                <!--<h3 class="box-title">标题</h3>-->
+                <!--</div>-->
+                <!-- /.box-header -->
+                <!-- form start -->
+                <form role="form" action="{:url('admin/save')}" method="post">
+                    <div class="box-body">
+
+                        <div class="form-group">
+                            <label>名称</label>
+                            <input type="email" class="form-control" placeholder="名称">
+                        </div>
+                        <div class="form-group">
+                            <label>描述</label>
+                            <input type="email" class="form-control" placeholder="描述">
+                        </div>
+
+                        <div class="form-group">
+                            <label>权限</label>
+                            <!--js_tree-->
+                            {include
+                            file="slot/JsTree/js_tree"
+                            name='js_tree' /}
+                        </div>
+
+                    </div>
+                    <!-- /.box-body -->
+
+                    <div class="box-footer">
+                        <a class="btn btn-default" href="javaScript:history.back(-1)">取消</a>
+                        <button type="submit" class="btn btn-info pull-right">提交</button>
+                    </div>
+
+                </form>
+            </div>
+            <!-- /.box -->
+        </div>
+    </div>
+</section>
+{/block}
+
+{block name="script"}
+
+<!--JsTree js-->
+{include file="slot/JsTree/script" name='js_tree' url='role/get_permissions' /}
+
+{/block}

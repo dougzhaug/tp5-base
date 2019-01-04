@@ -1,0 +1,67 @@
+<?php
+/**
+ * 总代理商/代理商管理
+ *
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2018/11/28
+ * Time: 13:56
+ */
+
+namespace app\admin\controller;
+
+
+use think\Request;
+
+class Agent extends Auth
+{
+    /**
+     * 代理商列表
+     */
+    public function index(Request $request)
+    {
+        if($request->isPost()){
+            //数据
+            $data = [
+                [
+                    'id'=>1,
+                    'name'=>'河北代理',
+                    'contacts'=>'李总',
+                    'contact_phone' => 18833552421,
+                    'email'=>'ddd@qq.com',
+                    'create_time'=>'2018-12-14'
+                ]
+            ];
+            //总条数
+            $total = 20;
+            return [
+                'draw' => intval($request->draw),
+                'recordsTotal' => $total,
+                'recordsFiltered' => $total,
+                'data' => $data,
+            ];
+        }
+        $inputGroupField = "['name'=>'姓名','phone'=>'手机号','email'=>'邮箱']";
+        return view('',['inputGroupField'=>$inputGroupField]);
+    }
+
+    /**
+     * 添加
+     *
+     * @return \think\response\View
+     */
+    public function create()
+    {
+        return view();
+    }
+
+    /**
+     * 编辑
+     *
+     * @return \think\response\View
+     */
+    public function edit()
+    {
+        return view();
+    }
+}

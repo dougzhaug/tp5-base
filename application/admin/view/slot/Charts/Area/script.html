@@ -1,0 +1,46 @@
+<!-- Morris.js charts -->
+<script src="__ADMIN__/bower_components/raphael/raphael.min.js"></script>
+<script src="__ADMIN__/bower_components/morris.js/morris.min.js"></script>
+
+<script>
+
+    $(function () {
+        /* Morris.js Charts */
+        // Sales chart
+        var area = new Morris.Area({
+            element   : 'revenue-chart',
+            resize    : true,
+            data      : [
+                { y: '2014 Q1', item1: 2001, item2: 1900 },
+                { y: '2014 Q2', item1: 2551, item2: 2510 },
+                { y: '2014 Q3', item1: 2491, item2: 2410 },
+                { y: '2014 Q4', item1: 2581, item2: 2430 },
+                { y: '2015 Q1', item1: 2601, item2: 2510 },
+                { y: '2015 Q2', item1: 2888, item2: 2705 },
+                { y: '2015 Q3', item1: 3001, item2: 2991 },
+                { y: '2015 Q4', item1: 2905, item2: 2802 },
+                { y: '2016 Q1', item1: 2666, item2: 2666 },
+                { y: '2016 Q2', item1: 2778, item2: 2294 },
+                { y: '2016 Q3', item1: 4912, item2: 1969 },
+                { y: '2016 Q4', item1: 3767, item2: 3597 },
+                { y: '2017 Q1', item1: 6810, item2: 1914 },
+                { y: '2017 Q2', item1: 5670, item2: 4293 },
+                { y: '2017 Q3', item1: 4820, item2: 3795 },
+                { y: '2017 Q4', item1: 15073, item2: 5967 },
+                { y: '2018 Q1', item1: 10687, item2: 4460 },
+                { y: '2018 Q2', item1: 8432, item2: 5713 },
+                { y: '2018 Q3', item1: 10932, item2: 9013 }
+            ],
+            xkey      : 'y',
+            ykeys     : ['item1', 'item2'],
+            labels    : ['总成交量', '有效成交'],
+            lineColors: ['#a0d0e0', '#3c8dbc'],
+            hideHover : 'auto'
+        });
+
+        // Fix for charts under tabs
+        $('.box ul.nav a').on('shown.bs.tab', function () {
+            area.redraw();
+        });
+    })
+</script>

@@ -1,0 +1,18 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2019/1/3
+ * Time: 10:33
+ */
+
+namespace app\admin\model;
+
+
+use think\Model;
+
+class AgentModel extends Model
+{
+    protected $table = 'T_Agent';
+    protected $pk = 'ID';
+}

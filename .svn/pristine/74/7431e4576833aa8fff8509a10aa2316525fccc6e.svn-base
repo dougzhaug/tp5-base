@@ -1,0 +1,209 @@
+<?php
+/**
+ * 管理员管理
+ *
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2018/12/10
+ * Time: 9:40
+ */
+
+namespace app\admin\controller;
+
+
+use think\Db;
+use think\Request;
+use app\admin\model\AdminModel;
+use app\admin\validate\AdminValidate;
+
+
+class Admin extends Auth
+{
+    public function index(Request $request)
+    {
+        $roleArr = $this->getSearchRole();
+        if($request->isPost()){
+            $params = $this->dealParams($request->param());
+            $admin = new AdminModel();
+            $list = $admin->getAdminlist($params);
+            return [
+                'draw' => intval($request->draw),
+                'recordsTotal' => $list['total'],
+                'recordsFiltered' => $list['total'],
+                'data' => $list['list'],
+            ];
+        }
+        $searchRoleStr = $this->arrayToTemplateString($roleArr,'Rname','Rid');
+        $inputField = "['Uname'=>'用户名','Uemail'=>'邮箱']";
+        return view('',['inputField'=>$inputField,'roleStr'=>$searchRoleStr]);
+    }
+
+    /**
+     * 添加
+     *
+     * @return \think\response\View
+     */
+    public function create(Request $request)
+    {
+        $searchRoleStr = $this->getSearchRole();
+        return view('',['roleStr'=>$searchRoleStr]);
+    }
+
+    /**
+     * 删除操作
+     *
+     * @return \think\response\View
+     */
+    public function delete(Request $request)
+    {
+        $uid = $request->param('Uid/d',0);
+        $adminUser = AdminModel::get($uid);
+        $adminUser->IsDel = 1;
+        if ($adminUser->save()){
+            $this->notice('操作成功');
+        }else{
+            $this->alerts('操作失败');
+        }
+    }
+    /**
+     * 禁用操作
+     */
+    public function forbid(Request $request)
+    {
+        $uid = $request->param('Uid/d',0);
+        $adminUser = AdminModel::get($uid);
+        $adminUser->IsState = 1;
+        if ($adminUser->save()){
+            $this->notice('操作成功');
+        }else{
+            $this->alerts('操作失败');
+        }
+    }
+
+
+    public function save(Request $request)
+    {
+        $admin    = new AdminModel();
+        $validate = new AdminValidate();
+        $data  = $request->only(['Uid','Uname','Upassword','Uemail','Role']);
+        //处理密码
+        if (isset($data['Upassword']) && empty($data['Upassword'])){
+            unset($data['Upassword']);
+        }
+        if (is_array($data['Role'])){
+            $data['Role'] = join(',',$data['Role']);
+        }
+        //根据主键判断添加还是更新
+        if (isset($data['Uid'])){
+            $uid = intval($data['Uid']);
+            unset($data['Uid']);
+            if (!$validate->check($data)) {
+                $this->alerts($validate->getError());
+            }
+            $res = $admin->save($data, ['Uid' => $uid]);
+        }else{
+            if (!$validate->check($data)) {
+                $this->alerts($validate->getError());
+            }
+            $res = $admin->save($data);
+        }
+        if ($res !== false){
+            $this->notice('操作成功',url('admin/index'));
+        }else{
+            $this->alerts($admin->getError());
+        }
+    }
+
+    /**
+     * 编辑
+     *
+     * @return \think\response\View
+     */
+    public function edit(Request $request)
+    {
+        $adminId = $request->param('id/d',0);
+        if ($adminId <= 0){
+            $this->alerts('无效访问');
+        }
+        $admin = new AdminModel();
+        $info = $admin->getAdminInfoByUid($adminId);
+        $roleArr = $this->getSearchRole();
+        return view('',['info'=>$info,'role'=>$roleArr]);
+    }
+    /*处理参数
+    */
+    protected function dealParams($requestData){
+        $fields    = []; //表格显示字段
+        $whereArr  = []; //筛选搜索条件
+        $pageLimit = 10; //每页条数
+        $pageStart = 0;  //起始页
+        $order     = []; //排序
+
+        $adminTableFields = (new AdminModel())->getTableFields();
+
+        if (isset($requestData['columns'])){
+           foreach ($requestData['columns'] as $key=>$value){
+               if (!empty($value['data']) && in_array($value['data'],$adminTableFields)){
+                   $fields[] =$value['data'];
+               }else{
+                   unset($requestData['columns'][$key]);
+               }
+           }
+        }
+        //搜索栏1
+        if (isset($requestData['option_field']) && $requestData['keyword']){
+            $whereArr[] = [$requestData['option_field'],'=',$requestData['keyword']];
+        }
+        //搜索栏2（角色）
+        if (isset($requestData['Role']) && intval($requestData['Role']) >0){
+            $whereArr[] = ['Role','=',intval($requestData['Role'])];
+        }
+        //搜索栏时间范围
+        if(!empty($requestData['date_range'])){
+            list($start_time,$end_time) = explode('~',$requestData['date_range']);
+            $whereArr[] = ['CreateTime','<= time',trim($end_time)];
+            $whereArr[] = ['CreateTime','>= time',trim($start_time)];
+        }
+        //分页条件
+        if (!empty($requestData['start']))  $pageStart = intval($requestData['start']);
+        if (!empty($requestData['length'])) $pageLimit = intval($requestData['length']);
+        //表头排序
+        if (isset($requestData['order'])){
+            foreach ($requestData['order'] as $items) {
+                if (isset($requestData['columns'][$items['column']])){
+                    $tmpfield = $requestData['columns'][$items['column']]['data'];
+                    if (isset($items['dir'])) $tmporder = $items['dir']== 'asc'? 'asc':'desc';
+                    $order[$tmpfield] = $tmporder;
+                }
+            }
+        }
+
+        return [
+            'fields'=>$fields,
+            'where' =>$whereArr,
+            'limit_s' =>$pageStart,
+            'limit_l' =>$pageLimit,
+            'order'=>$order
+        ];
+    }
+    protected function getSearchRole(){
+        $role = Db::table('T_Role')
+                ->field('Rid,Rname')
+                //->where() //暂时全显示
+                ->select();
+        return $role;
+    }
+    /**
+     * 数组转换成前台使用的字符串
+     *
+     * @return string
+     */
+    protected function arrayToTemplateString($arr,$name,$value){
+        $roleStr = "[['name'=>'请选择','value'=>0]";
+        foreach ($arr as $item) {
+            $roleStr .= ",['name'=>'{$item[$name]}','value'=>{$item[$value]}]";
+        }
+        $roleStr .= ']';
+        return $roleStr;
+    }
+}

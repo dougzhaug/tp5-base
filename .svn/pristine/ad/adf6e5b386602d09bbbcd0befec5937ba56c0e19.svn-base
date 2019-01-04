@@ -1,0 +1,6 @@
+<div id="js-tree"></div>
+
+<!--存储jstree所需的数据-->
+<input type="hidden" id="js_tree_ids" name="js_tree_ids" value="">
+
+<input type="hidden" id="[name]" name="[name]" value="">
