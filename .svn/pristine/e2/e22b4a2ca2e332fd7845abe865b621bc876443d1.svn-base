@@ -1,0 +1,46 @@
+<?php
+/**
+ *
+ * 统计管理
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2018/11/30
+ * Time: 15:03
+ */
+
+namespace app\admin\controller;
+
+use app\service\Statistics\StatisticsService;
+use think\Request;
+
+class Statistics extends Auth
+{
+    public function index()
+    {
+        return view();
+    }
+
+    /**
+     * 趋势统计
+     */
+    public function trend()
+    {
+        return view();
+    }
+
+    public function getStatisticsData(Request $request)
+    {
+        if(!$request->isAjax()){
+            return ['errorCode'=>1,'errorMessage'=>'请求失败'];
+        }
+        if(!$request->scene || !$request->time){
+            return ['errorCode'=>1,'errorMessage'=>'数据异常'];
+        }
+        $scene = is_array($request->scene) ? $request->scene : explode(',',$request->scene);
+        $time = is_array($request->time) ? $request->time : explode(',',$request->time);
+
+        $data = StatisticsService::make($scene,$time);
+
+        return ['errorCode'=>0,'data'=>$data];
+    }
+}

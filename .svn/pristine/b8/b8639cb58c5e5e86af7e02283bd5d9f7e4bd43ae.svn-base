@@ -1,0 +1,42 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2019/1/7
+ * Time: 9:25
+ */
+
+namespace app\admin\model;
+
+use think\Db;
+
+class OrderModel extends Model
+{
+    protected $table = 'T_Order';
+    protected $pk = 'Id';
+
+    //获取订单列表
+    public function getOrderList($params){
+        $fields = ('Id,AgentName,StoreName,ShopName,PayMode,OrderId,TotalFee,PayFee,PayStatus,PayTime');
+        $where  = array_merge($params['where'],[]);
+        $order  = empty($params['order']) ? $this->pk  : $params['order'];
+        $limit_start  = $params['limit_s'];
+        $limit_length = $params['limit_l'] >50 ? 50 : $params['limit_l'];
+        $counts = Db::table('view_order')->field($fields)->where($where)->count();
+        $lists  = Db::table('view_order')->field($fields)->where($where)->order($order)->limit($limit_start,$limit_length)->select();
+        foreach ($lists as $key=>$value){
+            $lists[$key]['PayStatus'] = $this->payStatusToString($value['PayStatus']);
+            $lists[$key]['PayMode']   = $this->payTypeToString($value['PayMode']);
+        }
+        return ['total'=>$counts , 'list'=>$lists];
+    }
+
+    protected function payStatusToString($value){
+        $stateArr = [1=>'成功',2=>'失败'];
+        return $stateArr[$value];
+    }
+    protected function payTypeToString($value){
+        $stateArr = [1=>'微信',2=>'支付宝'];
+        return $stateArr[$value];
+    }
+}
