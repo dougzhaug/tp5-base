@@ -37,6 +37,8 @@ return [
         '__ROOT__' => '/',
         '__STATIC__' => '/../static',
         '__ADMIN__' => '/../static/admin',
-    ]
+    ],
+    //2019-5-23 关闭模版缓存
+    'tpl_cache' => false,
 
 ];
